@@ -12,13 +12,18 @@ class BoundingBoxClass
 public:
 
 	String m_sInstance;//The name of the instance related to this sphere
-	bool m_bVisible;//Flag for rendering or not
+	bool m_obVisible;//Flag for rendering or not for OBB
+	bool m_abVisible;//Flag for rendering or not for AABB
 	float m_fRadius;//Radius of the Box
 	vector3 m_v3Centroid;//Centroid of the Box
 	vector3 m_v3Color;//Color of the Box
 	matrix4 m_mModelToWorld;//Model matrix of the Box
 	PrimitiveWireClass* m_pMesh;//Box Mesh
 	ModelManagerClass* m_pModelMngr;//ModelManager instance
+	vector3 minOBB;
+	vector3 maxOBB;
+	vector3 minAABB;
+	vector3 maxAABB;
 
 public:
 	/* Constructor 	*/
@@ -31,11 +36,16 @@ public:
 	~BoundingBoxClass(void);
 
 	/* Gets the visibility of the Box (whether or not it is going to be drawn in render) */
-	bool GetVisible(void);
+	bool GetOBBVisible(void);
 	/*Sets the visibility of the Box (whether or not it is going to be drawn in render)
 	Args:
 		bool a_bVisible -> true for draw false for not draw*/
-	void SetVisible(bool a_bVisible);
+	void SetOBBVisible(bool a_bVisible);
+	
+	bool GetAABBVisible(void);
+
+	void SetAABBVisible(bool a_bVisisble);
+
 	/* Property:
 	GetVisible() or GetVisible()*/
 	__declspec(property(get = GetVisible, put = SetVisible)) bool Visible;
@@ -74,9 +84,9 @@ public:
 	GetColor() or SetColor() */
 	__declspec(property(get = GetColor, put = SetColor)) vector3 Color;
 
-	/* Renders the bounding sphere
+	/* Renders the bounding box
 		Args:
-			a_vColor -> determinate the color of the sphere to be rendered, if MEDEFAULT
+			a_vColor -> determinate the color of the box to be rendered, if MEDEFAULT
 			it will render the shape in the constructed color (white) */
 	void Render( vector3 a_vColor = MEDEFAULT);
 
@@ -86,10 +96,9 @@ private:
 	/* Calculates the box from the instance
 	Args:
 		a_sInstance: The name of the instance for which the bounding sphere is going to be calculated */
-	void CalculateBox(String a_sInstance);
+	void CalculateAABB(String a_sInstance);
 };
 
 
 #endif //__BoundingBoxClass_H__
-};
 
