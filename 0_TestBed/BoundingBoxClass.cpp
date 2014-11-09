@@ -7,7 +7,8 @@ BoundingBoxClass::BoundingBoxClass(String a_sInstanceName)
 	m_v3Centroid = vector3(0.0f,0.0f,0.0f);
 	m_v3Color = MEWHITE;
 	m_mModelToWorld = matrix4(1.0f);
-	m_bVisible = false;
+	m_obVisible = false;
+	m_abVisible = false;
 
 	//Get the singleton instance of the Model Manager
 	m_pModelMngr = ModelManagerClass::GetInstance();
@@ -19,9 +20,8 @@ BoundingBoxClass::BoundingBoxClass(String a_sInstanceName)
 	if(nInstance == -1)
 		return;
 
-	//Construct a sphere with the dimensions of the instance, they will be allocated in the
-	//corresponding member variables inside the method
-	CalculateBox(m_sInstance);
+	CalculateAABB(m_sInstance);
+
 	//Get the Model to World matrix associated with the Instance
 	m_mModelToWorld = m_pModelMngr->GetModelMatrix(m_sInstance);
 	//If the size of the radius is 0 it means that there are no points or all of them are allocated
@@ -37,11 +37,17 @@ BoundingBoxClass::BoundingBoxClass(BoundingBoxClass const& other)
 {
 	//Initialize the Sphere using other instance of it
 	m_sInstance = other.m_sInstance;
-	m_bVisible = other.m_bVisible;
+	m_obVisible = other.m_obVisible;
+	m_abVisible = other.m_abVisible;
 	m_fRadius = other.m_fRadius;
 	m_v3Centroid = other.m_v3Centroid;
 	m_mModelToWorld = other.m_mModelToWorld;
 	m_pModelMngr = other.m_pModelMngr;
+	
+	minOBB = other.minOBB;
+	minAABB = other.minAABB;
+	maxOBB = other.maxOBB;
+	maxAABB = other.maxAABB;
 
 	m_pMesh = new PrimitiveWireClass();
 	m_pMesh->GenerateCube(m_fRadius, MEWHITE); //LOOK AT THIS
@@ -56,11 +62,17 @@ BoundingBoxClass& BoundingBoxClass::operator=(BoundingBoxClass const& other)
 		Release();
 		//Construct the object as in the copy constructor
 		m_sInstance = other.m_sInstance;
-		m_bVisible = other.m_bVisible;
+		m_obVisible = other.m_obVisible;
+		m_abVisible = other.m_abVisible;
 		m_fRadius = other.m_fRadius;
 		m_v3Centroid = other.m_v3Centroid;
 		m_mModelToWorld = other.m_mModelToWorld;
 		m_pModelMngr = other.m_pModelMngr;
+
+		minOBB = other.minOBB;
+		minAABB = other.minAABB;
+		maxOBB = other.maxOBB;
+		maxAABB = other.maxAABB;
 		
 		m_pMesh = new PrimitiveWireClass();
 		m_pMesh->GenerateCube(m_fRadius, MEWHITE); //LOOK AT THIS
@@ -102,11 +114,13 @@ void BoundingBoxClass::SetModelMatrix(matrix4 a_mModelMatrix)
 	//(which is translated m_v3Centrod away from the origin of our sphere)
 	m_pMesh->SetModelMatrix(glm::translate(a_mModelMatrix, m_v3Centroid));
 }
-bool BoundingBoxClass::GetVisible(void) { return m_bVisible; }
-void BoundingBoxClass::SetVisible(bool a_bVisible) { m_bVisible = a_bVisible; }
+bool BoundingBoxClass::GetOBBVisible(void) { return m_obVisible; }
+void BoundingBoxClass::SetOBBVisible(bool a_bVisible) { m_obVisible = a_bVisible; }
+bool BoundingBoxClass::GetAABBVisible(void) { return m_abVisible; }
+void BoundingBoxClass::SetAABBVisible(bool a_bVisible) { m_abVisible = a_bVisible; }
 String BoundingBoxClass::GetInstanceName(void){ return m_sInstance; }
 //Methods
-void BoundingBoxClass::CalculateBox(String a_sInstance)
+void BoundingBoxClass::CalculateAABB(String a_sInstance)
 {
 	//Get the vertices List to calculate the maximum and minimum
 	std::vector<vector3> vVertices = m_pModelMngr->GetVertices(a_sInstance);
@@ -169,6 +183,13 @@ void BoundingBoxClass::CalculateBox(String a_sInstance)
 		if(fDistance > m_fRadius)
 			m_fRadius = fDistance;
 	}
+	//LOOK AT LATER
+
+	vector3 scaleVectorAABB;
+
+	scaleVectorAABB.x = glm::distance(v3Minimum.x,v3Maximum.x);
+	scaleVectorAABB.y = glm::distance(v3Minimum.y,v3Maximum.y);
+	scaleVectorAABB.z = glm::distance(v3Minimum.z,v3Maximum.z);
 
 	return;
 }
@@ -177,7 +198,7 @@ void BoundingBoxClass::Render( vector3 a_vColor )
 {
 	//If the shape is visible render it
 	//otherwise just return
-	if(!m_bVisible)
+	if(!m_obVisible) //Check later
 		return;
 	//Calculate the color we want the shape to be
 	vector3 vColor;
