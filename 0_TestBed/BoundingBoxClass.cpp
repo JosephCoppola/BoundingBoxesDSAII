@@ -202,42 +202,45 @@ void BoundingBoxClass::CalculateOBB(String a_sInstance)
 }
 void BoundingBoxClass::CalculateAABB()
 {
-	//Get the vertices List to calculate the maximum and minimum
-	//std::vector<vector3> vVertices = m_pModelMngr->GetVertices(a_sInstance);
-	//int nVertices = static_cast<int>(vVertices.size());
+	std::vector<vector3> newVertices;
+	
+	newVertices.push_back(vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMax().z));
+	newVertices.push_back(vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMin().z));
+	newVertices.push_back(vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMin().z));
+	newVertices.push_back(vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMax().z));
+	newVertices.push_back(vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMax().z));
+	newVertices.push_back(vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMin().z));
+	newVertices.push_back(vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMin().z));
+	newVertices.push_back(vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMax().z));
+
+	int nVertices = static_cast<int>(newVertices.size());
 	
 	//If the size of the List is 0 it means we dont have any vertices in this Instance
 	//which means there is an error somewhere
-	//if(nVertices == 0)
-	//	return;
+	if(nVertices == 0)
+		return;
 
 	//Go one by one on each component and realize which one is the smallest one
-	//vector3 v3Minimum;
-	//if(nVertices > 0)
-	//{
-	//	//We assume the first vertex is the smallest one
-	//	v3Minimum = vVertices[0];
-	//	//And iterate one by one
-	//	for(int nVertex = 1; nVertex < nVertices; nVertex++)
-	//	{
-	//		if(vVertices[nVertex].x < v3Minimum.x)
-	//			v3Minimum.x = vVertices[nVertex].x;
+	vector3 v3Minimum;
+	if(nVertices > 0)
+	{
+		//We assume the first vertex is the smallest one
+		v3Minimum = newVertices[0];
+		//And iterate one by one
+		for(int nVertex = 1; nVertex < nVertices; nVertex++)
+		{
+			if(newVertices[nVertex].x < v3Minimum.x)
+				v3Minimum.x = newVertices[nVertex].x;
 	
-	//		if(vVertices[nVertex].y < v3Minimum.y)
-	//			v3Minimum.y = vVertices[nVertex].y;
+			if(newVertices[nVertex].y < v3Minimum.y)
+				v3Minimum.y = newVertices[nVertex].y;
 
-	//		if(vVertices[nVertex].z < v3Minimum.z)
-	//			v3Minimum.z = vVertices[nVertex].z;
-	//	}
-	//}
-	vector3 OBBpoint1 = vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMax().z);
-	vector3 OBBpoint2 = vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMin().z);
-	vector3 OBBpoint3 = vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMin().z);
-	vector3 OBBpoint4 = vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMax().z);
-	vector3 OBBpoint5 = vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMax().z);
-	vector3 OBBpoint6 = vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMin().z);
-	vector3 OBBpoint7 = vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMin().z);
-	vector3 OBBpoint8 = vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMax().z);
+			if(newVertices[nVertex].z < v3Minimum.z)
+				v3Minimum.z = newVertices[nVertex].z;
+		}
+	}
+
+	//vector3 OBBpoint3 = vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMin().z);
 	/*
 	//Go one by one on each component and realize which one is the largest one
 	vector3 v3Maximum;

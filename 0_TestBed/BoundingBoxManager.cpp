@@ -164,7 +164,7 @@ void BoundingBoxManager::Update(void)
 	//CollisionCheck();
 	//CollisionResponse();
 }
-void BoundingBoxManager::CollisionCheck(void)
+void BoundingBoxManager::CollisionCheck(void) //Needs working
 {
 	for(int nBox2 = 0; nBox2 < m_nBoxes; nBox2++)
 	{

@@ -1,0 +1,46 @@
+﻿Build started 11/10/2014 1:26:30 PM.
+     1>Project "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\0_TestBed\0_TestBed.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /Od /Oy- /D DEBUG /D _MBCS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\\" /Fd"C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\vc110.pdb" /Gd /TP /wd4251 /analyze- /errorReport:prompt /D _CRT_SECURE_NO_WARNINGS ApplicationClass.cpp
+         ApplicationClass.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBedD.exe" /INCREMENTAL /NOLOGO glew32.lib SOIL.lib opengl32.lib glu32.lib "sfml-system.lib" "sfml-window.lib" MyEngine_d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBedD.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBedD.lib" /MACHINE:X86 "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\BTO.res"
+         "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\Application.obj"
+         "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\ApplicationClass.obj"
+         "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\ApplicationControls.obj"
+         "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\BoundingBoxClass.obj"
+         "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\BoundingBoxManager.obj"
+         "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\BoundingSphereClass.obj"
+         "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\BoundingSphereManager.obj"
+         "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBed\Debug\Main.obj"
+         0_TestBed.vcxproj -> C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBedD.exe
+       PostBuildEvent:
+         mkdir “C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\_Binary\”
+         mkdir “C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\_Binary\Shaders\”
+         copy “C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\Z_DELETE\0_TestBedD.exe” “C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\_Binary”
+         xcopy "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\GL\bin" "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\_Binary" /y
+         xcopy "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\bin" "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\_Binary" /y
+         xcopy "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\Shaders" "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\_Binary\Shaders" /y
+         :VCEnd
+         A subdirectory or file C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\_Binary\ already exists.
+         A subdirectory or file C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\_Binary\Shaders\ already exists.
+                 1 file(s) copied.
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\GL\bin\glew32.dll
+         1 File(s) copied
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\bin\MyEngine.dll
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\bin\MyEngine_d.dll
+         2 File(s) copied
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\Shaders\Basic.fs
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\Shaders\Basic.vs
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\Shaders\Color.fs
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\Shaders\Color.vs
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\Shaders\MEShader.fs
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\Shaders\MEShader.vs
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\Shaders\MEShaderBW.fs
+         C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\include\ME\Shaders\MEShaderInv.fs
+         8 File(s) copied
+     1>Done Building Project "C:\Users\Joseph\Documents\RIT\Year 3\DSAII\BoundingBoxesDSAII\0_TestBed\0_TestBed.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.44
