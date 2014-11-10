@@ -62,7 +62,7 @@ void ApplicationClass::ProcessKeyboard(void)
 		matrix4 matrix = glm::translate( matrix4(1.0f), vector3(-0.1f,0.0f,0.0f)) * m_pModelManager->GetModelMatrix(m_sSelectedObject);
 		m_pModelManager->SetModelMatrix(matrix, m_sSelectedObject);
 		m_pBSMngr->SetModelMatrix(matrix, m_sSelectedObject);
-		//m_pBBMngr->SetModelMatrix(matrix, m_sSelectedObject);
+		m_pBBMngr->SetModelMatrix(matrix, m_sSelectedObject); //LOOK AT LATER
 		
 	}
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
@@ -70,7 +70,7 @@ void ApplicationClass::ProcessKeyboard(void)
 		matrix4 matrix = glm::translate( matrix4(1.0f), vector3(0.1f,0.0f,0.0f)) * m_pModelManager->GetModelMatrix(m_sSelectedObject);
 		m_pModelManager->SetModelMatrix(matrix, m_sSelectedObject);
 		m_pBSMngr->SetModelMatrix(matrix, m_sSelectedObject);
-		//m_pBBMngr->SetModelMatrix(matrix, m_sSelectedObject);
+		m_pBBMngr->SetModelMatrix(matrix, m_sSelectedObject); //LOOK AT LATER
 	}
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 	{
@@ -82,7 +82,7 @@ void ApplicationClass::ProcessKeyboard(void)
 		
 		m_pModelManager->SetModelMatrix(matrix, m_sSelectedObject);
 		m_pBSMngr->SetModelMatrix(matrix, m_sSelectedObject);
-		//m_pBBMngr->SetModelMatrix(matrix, m_sSelectedObject);
+		m_pBBMngr->SetModelMatrix(matrix, m_sSelectedObject); //LOOK AT LATER
 	}
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 	{
@@ -94,7 +94,7 @@ void ApplicationClass::ProcessKeyboard(void)
 		
 		m_pModelManager->SetModelMatrix(matrix, m_sSelectedObject);
 		m_pBSMngr->SetModelMatrix(matrix, m_sSelectedObject);
-		//m_pBBMngr->SetModelMatrix(matrix, m_sSelectedObject);
+		m_pBBMngr->SetModelMatrix(matrix, m_sSelectedObject); //LOOK AT LATER
 	}
 #pragma endregion
 	//Model Loading
@@ -146,13 +146,13 @@ void ApplicationClass::ProcessKeyboard(void)
 	}
 	else if(bWasF6Pressed == true)//if its not currently pressed but it was pressed last...
 	{
-		//m_pBBMngr->RemoveBox("ALL");//remove all spheres (if there are none currently nothing bad is going to happen)
-		//for(int nInstance = 0; nInstance < m_pModelManager->GetNumberOfInstances(); nInstance++)//for all instances...
-		//{
-		//	String sInstance = m_pModelManager->GetInstanceName(nInstance);//Create spheres
-		//	m_pBBMngr->AddBox(sInstance);
-		//}
-		//m_pBBMngr->SetVisible(true, "ALL");//Make those spheres visible
+		m_pBBMngr->RemoveBox("ALL");//remove all spheres (if there are none currently nothing bad is going to happen)
+		for(int nInstance = 0; nInstance < m_pModelManager->GetNumberOfInstances(); nInstance++)//for all instances...
+		{
+			String sInstance = m_pModelManager->GetInstanceName(nInstance);//Create 
+			m_pBBMngr->AddBox(sInstance);
+		}
+		m_pBBMngr->SetVisible(true, "ALL");//Make those spheres visible
 		bWasF6Pressed = false;//reset the flag
 	}
 
@@ -361,7 +361,7 @@ void ApplicationClass::ArcBall(float a_fSensitivity)
 	//m_pCamera0->Rotate(fVerticalAngle, fHorizontalAngle);
 	m_pModelManager->SetModelMatrix(arcball, m_sSelectedObject);
 	m_pBSMngr->SetModelMatrix(arcball, m_sSelectedObject);
-	//m_pBBMngr->SetModelMatrix(arcball, m_sSelectedObject);
+	m_pBBMngr->SetModelMatrix(arcball, m_sSelectedObject);
 	//m_pPrimitive->SetModelMatrix(arcball);
 }
 void ApplicationClass::CameraRotation(float a_fSpeed)

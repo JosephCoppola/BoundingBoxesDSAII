@@ -18,12 +18,15 @@ public:
 	vector3 m_v3Centroid;//Centroid of the Box
 	vector3 m_v3Color;//Color of the Box
 	matrix4 m_mModelToWorld;//Model matrix of the Box
-	PrimitiveWireClass* m_pMesh;//Box Mesh
+	PrimitiveWireClass* m_pMeshOBB;//OBB Mesh
+	PrimitiveWireClass* m_pMeshAABB;//AABB Mesh
 	ModelManagerClass* m_pModelMngr;//ModelManager instance
 	vector3 minOBB;
 	vector3 maxOBB;
 	vector3 minAABB;
 	vector3 maxAABB;
+	vector3 scale;
+	matrix4 scaleMatAABB;
 
 public:
 	/* Constructor 	*/
@@ -96,7 +99,8 @@ private:
 	/* Calculates the box from the instance
 	Args:
 		a_sInstance: The name of the instance for which the bounding sphere is going to be calculated */
-	void CalculateAABB(String a_sInstance);
+	void CalculateAABB();
+	void CalculateOBB(String a_sInstance);
 };
 
 

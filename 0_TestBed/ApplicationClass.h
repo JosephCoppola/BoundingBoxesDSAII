@@ -8,7 +8,7 @@ Date: 2014/10
 
 #include "ME\MyEngine.h"
 #include "BoundingSphereManager.h"
-//#include "BoundingBoxManager.h"
+#include "BoundingBoxManager.h"
 
 #include <SFML\Graphics.hpp>
 #include <chrono>
@@ -30,7 +30,7 @@ protected://General
 	
 	BoundingSphereManager* m_pBSMngr;
 	
-	//BoundingBoxManager* m_pBBMngr;
+	BoundingBoxManager* m_pBBMngr;
 
 	void Update (void);
 	void Display2X (void);
