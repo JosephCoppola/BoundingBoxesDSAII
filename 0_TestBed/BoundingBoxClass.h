@@ -15,8 +15,10 @@ public:
 	bool m_obVisible;//Flag for rendering or not for OBB
 	bool m_abVisible;//Flag for rendering or not for AABB
 	float m_fRadius;//Radius of the Box
-	vector3 m_v3Centroid;//Centroid of the Box
-	vector3 m_v3Color;//Color of the Box
+	vector3 OBBCentroid;//Centroid of the OBB
+	vector3 AABBCentroid;//Centroid of the AABB
+	vector3 OBBColor;//Color of the Box
+	vector3 AABBColor;
 	matrix4 m_mModelToWorld;//Model matrix of the Box
 	PrimitiveWireClass* m_pMeshOBB;//OBB Mesh
 	PrimitiveWireClass* m_pMeshAABB;//AABB Mesh
@@ -25,8 +27,8 @@ public:
 	vector3 maxOBB;
 	vector3 minAABB;
 	vector3 maxAABB;
-	vector3 scale;
-	matrix4 scaleMatAABB;
+	vector3 scaleOBB;
+	vector3 scaleAABB;
 
 public:
 	BoundingBoxClass(String a_sInstanceName);
@@ -78,7 +80,7 @@ private:
 	
 	void Release(void);
 	
-	void CalculateAABB();
+	void CalculateAABB(String a_sInstance);
 	void CalculateOBB(String a_sInstance);
 };
 

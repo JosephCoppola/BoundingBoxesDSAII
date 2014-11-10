@@ -5,12 +5,19 @@ BoundingBoxClass::BoundingBoxClass(String a_sInstanceName)
 	//Initialize variables
 	m_pMeshOBB = nullptr;
 	m_pMeshAABB = nullptr;
-	m_v3Centroid = vector3(0.0f,0.0f,0.0f);
-	m_v3Color = MEWHITE;
+	OBBCentroid = vector3(0.0f,0.0f,0.0f);
+	AABBCentroid = vector3(0.0f, 0.0f, 0.0f);
+	OBBColor = MEGREEN;
+	AABBColor = MEBLUE;
 	m_mModelToWorld = matrix4(1.0f);
 	m_obVisible = false;
 	m_abVisible = false;
-	scaleMatAABB = matrix4(1.0f);
+	scaleAABB = vector3(0.0f,0.0f,0.0f);
+	scaleOBB = vector3(0.0f,0.0f,0.0f);
+	minAABB = vector3(0.0f,0.0f,0.0f);
+	maxAABB = vector3(0.0f,0.0f,0.0f);
+	minOBB = vector3(0.0f,0.0f,0.0f);
+	maxOBB = vector3(0.0f,0.0f,0.0f);
 
 	//Get the singleton instance of the Model Manager
 	m_pModelMngr = ModelManagerClass::GetInstance();
@@ -23,7 +30,7 @@ BoundingBoxClass::BoundingBoxClass(String a_sInstanceName)
 		return;
 
 	CalculateOBB(m_sInstance);
-	//CalculateAABB(m_sInstance);
+	CalculateAABB(m_sInstance);
 
 	//Get the Model to World matrix associated with the Instance
 	m_mModelToWorld = m_pModelMngr->GetModelMatrix(m_sInstance);
@@ -36,15 +43,15 @@ BoundingBoxClass::BoundingBoxClass(String a_sInstanceName)
 	// CREATES OBB
 	m_pMeshOBB = new PrimitiveWireClass();
 	m_pMeshOBB->GenerateCube(1.0f, MEGREEN); //LOOK AT THIS
-	matrix4 scaleMat = glm::scale(matrix4(1.0f),scale);
-	matrix4 translateMat = glm::translate(m_mModelToWorld, m_v3Centroid);
+	matrix4 scaleMat = glm::scale(matrix4(1.0f),scaleOBB);
+	matrix4 translateMat = glm::translate(m_mModelToWorld, OBBCentroid);
 	m_pMeshOBB->SetModelMatrix(translateMat * scaleMat);
 
 	// CREATES AABB
 	m_pMeshAABB = new PrimitiveWireClass();
-	m_pMeshAABB->GenerateCube(1.0f, MEGREEN); //LOOK AT THIS
-	matrix4 scaleMatAABB = glm::scale(matrix4(1.0f),scale);
-	matrix4 translateMatAABB = glm::translate(m_mModelToWorld, m_v3Centroid);
+	m_pMeshAABB->GenerateCube(1.0f, MEBLUE); //LOOK AT THIS
+	matrix4 scaleMatAABB = glm::scale(matrix4(1.0f),scaleAABB);
+	matrix4 translateMatAABB = glm::translate(m_mModelToWorld, AABBCentroid);
 	m_pMeshAABB->SetModelMatrix(translateMatAABB * scaleMatAABB);
 }
 BoundingBoxClass::BoundingBoxClass(BoundingBoxClass const& other)
@@ -54,7 +61,8 @@ BoundingBoxClass::BoundingBoxClass(BoundingBoxClass const& other)
 	m_obVisible = other.m_obVisible;
 	m_abVisible = other.m_abVisible;
 	m_fRadius = other.m_fRadius;
-	m_v3Centroid = other.m_v3Centroid;
+	OBBCentroid = other.OBBCentroid;
+	AABBCentroid = other.AABBCentroid;
 	m_mModelToWorld = other.m_mModelToWorld;
 	m_pModelMngr = other.m_pModelMngr;
 	
@@ -65,7 +73,7 @@ BoundingBoxClass::BoundingBoxClass(BoundingBoxClass const& other)
 
 	m_pMeshOBB = new PrimitiveWireClass();
 	m_pMeshOBB->GenerateCube(1.0f, MEWHITE); //LOOK AT THIS
-	m_pMeshOBB->SetModelMatrix(glm::translate(m_mModelToWorld, m_v3Centroid));
+	m_pMeshOBB->SetModelMatrix(glm::translate(m_mModelToWorld, OBBCentroid));
 }
 BoundingBoxClass& BoundingBoxClass::operator=(BoundingBoxClass const& other)
 {
@@ -79,7 +87,8 @@ BoundingBoxClass& BoundingBoxClass::operator=(BoundingBoxClass const& other)
 		m_obVisible = other.m_obVisible;
 		m_abVisible = other.m_abVisible;
 		m_fRadius = other.m_fRadius;
-		m_v3Centroid = other.m_v3Centroid;
+		OBBCentroid = other.OBBCentroid;
+		AABBCentroid = other.AABBCentroid;
 		m_mModelToWorld = other.m_mModelToWorld;
 		m_pModelMngr = other.m_pModelMngr;
 
@@ -90,7 +99,7 @@ BoundingBoxClass& BoundingBoxClass::operator=(BoundingBoxClass const& other)
 		
 		m_pMeshOBB = new PrimitiveWireClass();
 		m_pMeshOBB->GenerateCube(m_fRadius, MEWHITE); //LOOK AT THIS
-		m_pMeshOBB->SetModelMatrix(glm::translate(m_mModelToWorld, m_v3Centroid));
+		m_pMeshOBB->SetModelMatrix(glm::translate(m_mModelToWorld, OBBCentroid));
 	}
 	return *this;
 }
@@ -107,6 +116,11 @@ void BoundingBoxClass::Release(void)
 		delete m_pMeshOBB;
 		m_pMeshOBB = nullptr;
 	}
+	if(m_pMeshAABB != nullptr)
+	{
+		delete m_pMeshAABB;
+		m_pMeshAABB = nullptr;
+	}
 
 	//The job of releasing the Model Manager Instance is going to be the work
 	//of another method, we can't assume that this class is the last class
@@ -116,25 +130,30 @@ void BoundingBoxClass::Release(void)
 }
 //Accessors
 float BoundingBoxClass::GetRadius(void){ return m_fRadius; }
-vector3 BoundingBoxClass::GetCentroid(void){ return m_v3Centroid; }
-vector3 BoundingBoxClass::GetColor(void){ return m_v3Color; }
-void BoundingBoxClass::SetColor(vector3 a_v3Color){ m_v3Color = a_v3Color; }
+vector3 BoundingBoxClass::GetCentroid(void){ return OBBCentroid; } // CHANGE FOR AABB
+vector3 BoundingBoxClass::GetColor(void){ return OBBColor; } // CHANGE FOR AABB
+void BoundingBoxClass::SetColor(vector3 a_v3Color){ OBBColor = a_v3Color; } // CHANGE FOR AABB
 matrix4 BoundingBoxClass::GetModelMatrix(void){ return m_mModelToWorld; }
-void BoundingBoxClass::SetModelMatrix(matrix4 a_mModelMatrix)
+void BoundingBoxClass::SetModelMatrix(matrix4 a_mModelMatrix) //Check here later
 {
-	//Sets the model matrix of the Sphere
 	m_mModelToWorld = a_mModelMatrix;
-	//Sets the Model Matrix of the actual Sphere shape
-	//(which is translated m_v3Centrod away from the origin of our sphere)
+
 	m_pMeshOBB->SetModelMatrix(a_mModelMatrix);
 
-	CalculateAABB(); // LOL CHECK THIS
-	m_pMeshAABB->SetModelMatrix(a_mModelMatrix);
+	CalculateAABB(m_sInstance);
+
+	matrix4 scaleMatOBB = glm::scale(matrix4(1.0f),scaleOBB);
+	matrix4 translationMatOBB = glm::translate(m_mModelToWorld,OBBCentroid);
+	m_pMeshOBB->SetModelMatrix(translationMatOBB * scaleMatOBB);
+
+	matrix4 scaleMatAABB = glm::scale(matrix4(1.0f), scaleAABB);
+	matrix4 translateMatAABB = glm::translate(AABBCentroid);
+	m_pMeshAABB->SetModelMatrix(translateMatAABB * scaleMatAABB );
 }
 bool BoundingBoxClass::GetOBBVisible(void) { return m_obVisible; }
 void BoundingBoxClass::SetOBBVisible(bool a_bVisible) { m_obVisible = a_bVisible; }
-bool BoundingBoxClass::GetAABBVisible(void) { return m_abVisible; }
-void BoundingBoxClass::SetAABBVisible(bool a_bVisible) { m_abVisible = a_bVisible; }
+bool BoundingBoxClass::GetAABBVisible(void) { return m_abVisible; } //CHANGE
+void BoundingBoxClass::SetAABBVisible(bool a_bVisible) { m_abVisible = a_bVisible; } //Change
 String BoundingBoxClass::GetInstanceName(void){ return m_sInstance; }
 //Methods
 void BoundingBoxClass::CalculateOBB(String a_sInstance)
@@ -166,6 +185,7 @@ void BoundingBoxClass::CalculateOBB(String a_sInstance)
 			if(vVertices[nVertex].z < v3Minimum.z)
 				v3Minimum.z = vVertices[nVertex].z;
 		}
+		minOBB = v3Minimum;
 	}
 	
 	//Go one by one on each component and realize which one is the largest one
@@ -186,11 +206,12 @@ void BoundingBoxClass::CalculateOBB(String a_sInstance)
 			if(vVertices[nVertex].z > v3Maximum.z)
 				v3Maximum.z = vVertices[nVertex].z;
 		}
+		maxOBB = v3Maximum;
 	}
 
 	//The centroid is going to be the point that is halfway of the min to the max
-	m_v3Centroid = v3Minimum + v3Maximum;
-	m_v3Centroid /= 2.0f;
+	OBBCentroid = minOBB + maxOBB;
+	OBBCentroid /= 2.0f;
 
 	vector3 scaleVector;
 
@@ -198,81 +219,73 @@ void BoundingBoxClass::CalculateOBB(String a_sInstance)
 	scaleVector.y = glm::distance(v3Minimum.y,v3Maximum.y);
 	scaleVector.z = glm::distance(v3Minimum.z,v3Maximum.z);
 
-	scale = scaleVector;
+	scaleOBB = scaleVector;
 }
-void BoundingBoxClass::CalculateAABB()
+void BoundingBoxClass::CalculateAABB(String a_sInstance)
 {
-	std::vector<vector3> newVertices;
-	
-	newVertices.push_back(vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMax().z));
-	newVertices.push_back(vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMin().z));
-	newVertices.push_back(vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMin().z));
-	newVertices.push_back(vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMax().z));
-	newVertices.push_back(vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMax().z));
-	newVertices.push_back(vector3(m_pMeshOBB->GetMin().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMin().z));
-	newVertices.push_back(vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMin().z));
-	newVertices.push_back(vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMax().y, m_pMeshOBB->GetMax().z));
-
+	std::vector<vector3> newVertices = m_pModelMngr->GetVertices(a_sInstance);
 	int nVertices = static_cast<int>(newVertices.size());
-	
-	//If the size of the List is 0 it means we dont have any vertices in this Instance
-	//which means there is an error somewhere
+
 	if(nVertices == 0)
 		return;
 
+	std::vector<vector4> globalVerts = std::vector<vector4>(nVertices);
+
+	for(int i = 0; i < nVertices; i++)
+	{
+		globalVerts[i] = vector4(newVertices[i].x, newVertices[i].y, newVertices[i].z, 1.0f);
+		globalVerts[i] = m_mModelToWorld * globalVerts[i];
+	}
+
 	//Go one by one on each component and realize which one is the smallest one
-	vector3 v3Minimum;
 	if(nVertices > 0)
 	{
-		//We assume the first vertex is the smallest one
-		v3Minimum = newVertices[0];
-		//And iterate one by one
+		minAABB = static_cast<vector3>(globalVerts[0]);
+
 		for(int nVertex = 1; nVertex < nVertices; nVertex++)
 		{
-			if(newVertices[nVertex].x < v3Minimum.x)
-				v3Minimum.x = newVertices[nVertex].x;
+			if(globalVerts[nVertex].x < minAABB.x)
+				minAABB.x = globalVerts[nVertex].x;
 	
-			if(newVertices[nVertex].y < v3Minimum.y)
-				v3Minimum.y = newVertices[nVertex].y;
+			if(globalVerts[nVertex].y < minAABB.y)
+				minAABB.y = globalVerts[nVertex].y;
 
-			if(newVertices[nVertex].z < v3Minimum.z)
-				v3Minimum.z = newVertices[nVertex].z;
+			if(globalVerts[nVertex].z < minAABB.z)
+				minAABB.z = globalVerts[nVertex].z;
 		}
 	}
-
-	//vector3 OBBpoint3 = vector3(m_pMeshOBB->GetMax().x, m_pMeshOBB->GetMin().y, m_pMeshOBB->GetMin().z);
-	/*
+	
 	//Go one by one on each component and realize which one is the largest one
-	vector3 v3Maximum;
 	if(nVertices > 0)
 	{
-		//We assume the first vertex is the largest one
-		v3Maximum = vVertices[0];
-		//And iterate one by one
+
+		maxAABB = static_cast<vector3>(globalVerts[0]);
+
 		for(int nVertex = 1; nVertex < nVertices; nVertex++)
 		{
-			if(vVertices[nVertex].x > v3Maximum.x)
-				v3Maximum.x = vVertices[nVertex].x;
+			if(globalVerts[nVertex].x > maxAABB.x)
+				maxAABB.x = globalVerts[nVertex].x;
 
-			if(vVertices[nVertex].y > v3Maximum.y)
-				v3Maximum.y = vVertices[nVertex].y;
+			if(globalVerts[nVertex].y > maxAABB.y)
+				maxAABB.y = globalVerts[nVertex].y;
 
-			if(vVertices[nVertex].z > v3Maximum.z)
-				v3Maximum.z = vVertices[nVertex].z;
+			if(globalVerts[nVertex].z > maxAABB.z)
+				maxAABB.z = globalVerts[nVertex].z;
 		}
-	}
-	
+	}	
 
 	//The centroid is going to be the point that is halfway of the min to the max
-	m_v3Centroid = v3Minimum + v3Maximum;
-	m_v3Centroid /= 2.0f;
+	AABBCentroid = minAABB + maxAABB;
+	AABBCentroid /= 2.0f;
 
-	vector3 scaleVectorAABB;
+	vector3 scaleVector;
 
-	scaleVectorAABB.x = glm::distance(v3Minimum.x,v3Maximum.x);
-	scaleVectorAABB.y = glm::distance(v3Minimum.y,v3Maximum.y);
-	scaleVectorAABB.z = glm::distance(v3Minimum.z,v3Maximum.z);
-	*/
+	scaleVector.x = glm::distance(minAABB.x,maxAABB.x);
+	scaleVector.y = glm::distance(minAABB.y,maxAABB.y);
+	scaleVector.z = glm::distance(minAABB.z,maxAABB.z);
+
+	scaleAABB = scaleVector;
+	
 	return;
 }
 
@@ -286,12 +299,11 @@ void BoundingBoxClass::Render( vector3 a_vColor )
 	vector3 vColor;
 	//if the argument was MEDEFAULT just use the color variable in our class
 	if(a_vColor == MEDEFAULT)
-		vColor = m_v3Color;
+		vColor = AABBColor;
 	else //Otherwise use the argument
 		vColor = a_vColor;
 
 	//render the shape using a special case of the Shape Render method which uses the Color Shader.
-	m_pMeshOBB->Render( matrix4(1.0f), vColor );
-	m_pMeshAABB->Render( matrix4(1.0f), MERED );
-	
+	m_pMeshOBB->Render( matrix4(1.0f), OBBColor );
+	m_pMeshAABB->Render( matrix4(1.0f), AABBColor );
 }

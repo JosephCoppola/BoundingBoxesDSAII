@@ -45,13 +45,17 @@ void BoundingBoxManager::SetVisible(bool a_bVisible, String a_sInstance)
 		for(int nBox = 0; nBox < nBoxes; nBox++)
 		{
 			m_vBoundingBox[nBox]->SetOBBVisible(a_bVisible); //CHANGE LATER
+			m_vBoundingBox[nBox]->SetAABBVisible(a_bVisible);
 		}
 	}
 	else
 	{
 		int nBox = m_pModelMngr->IdentifyInstance(a_sInstance);
 		if(nBox < 0 || nBox < m_nBoxes)
+		{
 			m_vBoundingBox[nBox]->SetOBBVisible(a_bVisible);//CHANGE LATER
+			m_vBoundingBox[nBox]->SetAABBVisible(a_bVisible);
+		}
 	}
 }
 void BoundingBoxManager::SetColor(vector3 a_v3Color, String a_sInstance)
@@ -78,10 +82,7 @@ void BoundingBoxManager::SetModelMatrix(matrix4 a_mModelMatrix, String a_sInstan
 		int nBoxes = GetNumberOfBoxes();
 		for(int nBox = 0; nBox < nBoxes; nBox++)
 		{
-			matrix4 scaleMat = glm::scale(matrix4(1.0f), m_vBoundingBox[nBox]->scale);
-			matrix4 translateMat = glm::translate(a_mModelMatrix, m_vBoundingBox[nBox]->m_v3Centroid);
-
-			m_vBoundingBox[nBox]->SetModelMatrix(translateMat * scaleMat);
+			m_vBoundingBox[nBox]->SetModelMatrix(a_mModelMatrix);
 		}
 	}
 	else
@@ -89,10 +90,7 @@ void BoundingBoxManager::SetModelMatrix(matrix4 a_mModelMatrix, String a_sInstan
 		int nBox = m_pModelMngr->IdentifyInstance(a_sInstance);
 		if(nBox < 0 || nBox < m_nBoxes)
 		{
-			matrix4 scaleMat = glm::scale(matrix4(1.0f), m_vBoundingBox[nBox]->scale);
-			matrix4 translateMat = glm::translate(m_pModelMngr->GetModelMatrix(a_sInstance), m_vBoundingBox[nBox]->m_v3Centroid);
-
-			m_vBoundingBox[nBox]->SetModelMatrix(translateMat * scaleMat);
+			m_vBoundingBox[nBox]->SetModelMatrix(a_mModelMatrix);
 		}
 	}
 }
