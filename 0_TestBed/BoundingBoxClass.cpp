@@ -7,8 +7,8 @@ BoundingBoxClass::BoundingBoxClass(String a_sInstanceName)
 	m_pMeshAABB = nullptr;
 	OBBCentroid = vector3(0.0f,0.0f,0.0f);
 	AABBCentroid = vector3(0.0f, 0.0f, 0.0f);
-	OBBColor = MEGREEN;
-	AABBColor = MEBLUE;
+	OBBColor = MEWHITE;
+	AABBColor = MEWHITE;
 	m_mModelToWorld = matrix4(1.0f);
 	m_obVisible = false;
 	m_abVisible = false;
@@ -29,27 +29,23 @@ BoundingBoxClass::BoundingBoxClass(String a_sInstanceName)
 	if(nInstance == -1)
 		return;
 
+	//Calculate the intial OBB and AABB
 	CalculateOBB(m_sInstance);
 	CalculateAABB(m_sInstance);
 
 	//Get the Model to World matrix associated with the Instance
 	m_mModelToWorld = m_pModelMngr->GetModelMatrix(m_sInstance);
-	//If the size of the radius is 0 it means that there are no points or all of them are allocated
-	//right at the origin, which will cause an issue, so we just return with no allocations
-	if(m_fRadius == 0.0f)
-		return;
-	//Crete a new Sphere and initialize it using the member variables
 
 	// CREATES OBB
 	m_pMeshOBB = new PrimitiveWireClass();
-	m_pMeshOBB->GenerateCube(1.0f, MEGREEN); //LOOK AT THIS
-	matrix4 scaleMat = glm::scale(matrix4(1.0f),scaleOBB);
-	matrix4 translateMat = glm::translate(m_mModelToWorld, OBBCentroid);
-	m_pMeshOBB->SetModelMatrix(translateMat * scaleMat);
+	m_pMeshOBB->GenerateCube(1.0f, MEWHITE);
+	matrix4 scaleOBBMat = glm::scale(matrix4(1.0f),scaleOBB);
+	matrix4 translateOBBMat = glm::translate(m_mModelToWorld, OBBCentroid);
+	m_pMeshOBB->SetModelMatrix(translateOBBMat * scaleOBBMat);
 
 	// CREATES AABB
 	m_pMeshAABB = new PrimitiveWireClass();
-	m_pMeshAABB->GenerateCube(1.0f, MEBLUE); //LOOK AT THIS
+	m_pMeshAABB->GenerateCube(1.0f, MEWHITE); 
 	matrix4 scaleMatAABB = glm::scale(matrix4(1.0f),scaleAABB);
 	matrix4 translateMatAABB = glm::translate(m_mModelToWorld, AABBCentroid);
 	m_pMeshAABB->SetModelMatrix(translateMatAABB * scaleMatAABB);
@@ -60,7 +56,6 @@ BoundingBoxClass::BoundingBoxClass(BoundingBoxClass const& other)
 	m_sInstance = other.m_sInstance;
 	m_obVisible = other.m_obVisible;
 	m_abVisible = other.m_abVisible;
-	m_fRadius = other.m_fRadius;
 	OBBCentroid = other.OBBCentroid;
 	AABBCentroid = other.AABBCentroid;
 	m_mModelToWorld = other.m_mModelToWorld;
@@ -71,9 +66,23 @@ BoundingBoxClass::BoundingBoxClass(BoundingBoxClass const& other)
 	maxOBB = other.maxOBB;
 	maxAABB = other.maxAABB;
 
+	//Calculate the new OBB and AABB
+	CalculateOBB(m_sInstance);
+	CalculateAABB(m_sInstance);
+
+	// CREATES OBB
 	m_pMeshOBB = new PrimitiveWireClass();
-	m_pMeshOBB->GenerateCube(1.0f, MEWHITE); //LOOK AT THIS
-	m_pMeshOBB->SetModelMatrix(glm::translate(m_mModelToWorld, OBBCentroid));
+	m_pMeshOBB->GenerateCube(1.0f, MEWHITE);
+	matrix4 scaleOBBMat = glm::scale(matrix4(1.0f),scaleOBB);
+	matrix4 translateOBBMat = glm::translate(m_mModelToWorld, OBBCentroid);
+	m_pMeshOBB->SetModelMatrix(translateOBBMat * scaleOBBMat);
+
+	// CREATES AABB
+	m_pMeshAABB = new PrimitiveWireClass();
+	m_pMeshAABB->GenerateCube(1.0f, MEWHITE); 
+	matrix4 scaleMatAABB = glm::scale(matrix4(1.0f),scaleAABB);
+	matrix4 translateMatAABB = glm::translate(m_mModelToWorld, AABBCentroid);
+	m_pMeshAABB->SetModelMatrix(translateMatAABB * scaleMatAABB);
 }
 BoundingBoxClass& BoundingBoxClass::operator=(BoundingBoxClass const& other)
 {
@@ -86,20 +95,29 @@ BoundingBoxClass& BoundingBoxClass::operator=(BoundingBoxClass const& other)
 		m_sInstance = other.m_sInstance;
 		m_obVisible = other.m_obVisible;
 		m_abVisible = other.m_abVisible;
-		m_fRadius = other.m_fRadius;
 		OBBCentroid = other.OBBCentroid;
 		AABBCentroid = other.AABBCentroid;
 		m_mModelToWorld = other.m_mModelToWorld;
 		m_pModelMngr = other.m_pModelMngr;
 
+		OBBColor = other.OBBColor;
+		AABBColor = other.AABBColor;
+
 		minOBB = other.minOBB;
 		minAABB = other.minAABB;
 		maxOBB = other.maxOBB;
 		maxAABB = other.maxAABB;
-		
+
 		m_pMeshOBB = new PrimitiveWireClass();
-		m_pMeshOBB->GenerateCube(m_fRadius, MEWHITE); //LOOK AT THIS
-		m_pMeshOBB->SetModelMatrix(glm::translate(m_mModelToWorld, OBBCentroid));
+		matrix4 scaleMatOBB = glm::scale(matrix4(1.0f),scaleOBB);
+		matrix4 translateOBB = glm::translate(m_mModelToWorld, OBBCentroid);
+		m_pMeshOBB->SetModelMatrix(scaleMatOBB * translateOBB);
+
+
+		m_pMeshAABB = new PrimitiveWireClass();
+		matrix4 scaleMatAABB = glm::scale(matrix4(1.0f),scaleAABB);
+		matrix4 translateAABB = glm::translate(m_mModelToWorld, AABBCentroid);
+		m_pMeshAABB->SetModelMatrix(scaleMatAABB * translateAABB);
 	}
 	return *this;
 }
@@ -128,12 +146,39 @@ void BoundingBoxClass::Release(void)
 	//point at nothing.
 	m_pModelMngr = nullptr;
 }
+
 //Accessors
-float BoundingBoxClass::GetRadius(void){ return m_fRadius; }
-vector3 BoundingBoxClass::GetCentroid(void){ return OBBCentroid; } // CHANGE FOR AABB
-vector3 BoundingBoxClass::GetColor(void){ return OBBColor; } // CHANGE FOR AABB
-void BoundingBoxClass::SetColor(vector3 a_v3Color){ OBBColor = a_v3Color; } // CHANGE FOR AABB
+vector3 BoundingBoxClass::GetCentroidOBB(void){ return OBBCentroid; } 
+vector3 BoundingBoxClass::GetCentroidAABB(void){ return AABBCentroid; } 
+
+vector3 BoundingBoxClass::GetColorOBB(void){ return OBBColor; }
+void BoundingBoxClass::SetColorOBB(vector3 a_v3Color){ OBBColor = a_v3Color; } 
+
+vector3 BoundingBoxClass::GetColorAABB(void){ return AABBColor; } 
+void BoundingBoxClass::SetColorAABB(vector3 a_v3Color){ AABBColor = a_v3Color; } 
+
+void BoundingBoxClass::SetAABBVisible(bool a_bVisible){ m_abVisible = a_bVisible; }
+bool BoundingBoxClass::GetAABBVisible(void){ return m_abVisible; }
+
+void BoundingBoxClass::SetOBBVisible(bool a_bVisible){ m_obVisible = a_bVisible; }
+bool BoundingBoxClass::GetOBBVisible(void){ return m_obVisible; }
+
+vector3 BoundingBoxClass::GetSizeOBB(void) {return scaleOBB;}
+void BoundingBoxClass::SetSizeOBB(vector3 p_sizeVector){scaleOBB = p_sizeVector;}
+
+vector3 BoundingBoxClass::GetSizeAABB(void){return scaleAABB;}
+void BoundingBoxClass::SetSizeAABB(vector3 p_sizeVector){scaleAABB = p_sizeVector;}
+
 matrix4 BoundingBoxClass::GetModelMatrix(void){ return m_mModelToWorld; }
+
+vector3 BoundingBoxClass::GetMinOBB(void){ return minOBB; }
+vector3 BoundingBoxClass::GetMaxOBB(void){ return maxOBB; }
+
+vector3 BoundingBoxClass::GetMinAABB(void){ return minAABB; }
+vector3 BoundingBoxClass::GetMaxAABB(void){ return maxAABB; }
+
+String BoundingBoxClass::GetInstanceName(void){ return m_sInstance; }
+
 void BoundingBoxClass::SetModelMatrix(matrix4 a_mModelMatrix) //Check here later
 {
 	m_mModelToWorld = a_mModelMatrix;
@@ -150,11 +195,7 @@ void BoundingBoxClass::SetModelMatrix(matrix4 a_mModelMatrix) //Check here later
 	matrix4 translateMatAABB = glm::translate(AABBCentroid);
 	m_pMeshAABB->SetModelMatrix(translateMatAABB * scaleMatAABB );
 }
-bool BoundingBoxClass::GetOBBVisible(void) { return m_obVisible; }
-void BoundingBoxClass::SetOBBVisible(bool a_bVisible) { m_obVisible = a_bVisible; }
-bool BoundingBoxClass::GetAABBVisible(void) { return m_abVisible; } //CHANGE
-void BoundingBoxClass::SetAABBVisible(bool a_bVisible) { m_abVisible = a_bVisible; } //Change
-String BoundingBoxClass::GetInstanceName(void){ return m_sInstance; }
+
 //Methods
 void BoundingBoxClass::CalculateOBB(String a_sInstance)
 {
@@ -291,19 +332,34 @@ void BoundingBoxClass::CalculateAABB(String a_sInstance)
 
 void BoundingBoxClass::Render( vector3 a_vColor )
 {
-	//If the shape is visible render it
-	//otherwise just return
-	if(!m_obVisible) //Check later
+	if(!GetAABBVisible() && !GetOBBVisible())
 		return;
-	//Calculate the color we want the shape to be
-	vector3 vColor;
-	//if the argument was MEDEFAULT just use the color variable in our class
-	if(a_vColor == MEDEFAULT)
-		vColor = AABBColor;
-	else //Otherwise use the argument
-		vColor = a_vColor;
 
-	//render the shape using a special case of the Shape Render method which uses the Color Shader.
-	m_pMeshOBB->Render( matrix4(1.0f), OBBColor );
-	m_pMeshAABB->Render( matrix4(1.0f), AABBColor );
+	if(GetOBBVisible())
+	{
+		vector3 vColor;
+
+		if(a_vColor == MEWHITE)
+			vColor = OBBColor;
+
+		else //Otherwise use the argument
+			vColor = a_vColor;
+
+		//render the shape using a special case of the Shape Render method which uses the Color Shader.
+		m_pMeshOBB->Render( matrix4(1.0f), vColor );
+	}
+
+	if(GetAABBVisible())
+	{
+		vector3 vColor;
+
+		if(a_vColor == MEDEFAULT)
+			vColor = AABBColor;
+
+		else //Otherwise use the argument
+			vColor = a_vColor;
+
+		//render the shape using a special case of the Shape Render method which uses the Color Shader.
+		m_pMeshAABB->Render( matrix4(1.0f), vColor );
+	}
 }

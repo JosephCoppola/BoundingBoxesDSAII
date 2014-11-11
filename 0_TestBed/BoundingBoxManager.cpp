@@ -1,5 +1,5 @@
 #include "BoundingBoxManager.h"
-//  BoundingBoxManager
+
 BoundingBoxManager* BoundingBoxManager::m_pInstance = nullptr;
 
 BoundingBoxManager* BoundingBoxManager::GetInstance()
@@ -10,6 +10,7 @@ BoundingBoxManager* BoundingBoxManager::GetInstance()
 	}
 	return m_pInstance;
 }
+
 void BoundingBoxManager::ReleaseInstance()
 {
 	if(m_pInstance != nullptr)
@@ -18,25 +19,30 @@ void BoundingBoxManager::ReleaseInstance()
 		m_pInstance = nullptr;
 	}
 }
+
 void BoundingBoxManager::Init(void)
 {
 	m_pModelMngr = ModelManagerClass::GetInstance();
-	m_vCollidingNames.clear();
+	m_vCollidingNamesOBB.clear();
+	m_vCollidingNamesAABB.clear();
 	m_nBoxes = 0;
 }
+
 void BoundingBoxManager::Release(void)
 {
 	RemoveBox("ALL");
 	return;
 }
+
 //The big 3
 BoundingBoxManager::BoundingBoxManager(){Init();}
 BoundingBoxManager::BoundingBoxManager(BoundingBoxManager const& other){ }
 BoundingBoxManager& BoundingBoxManager::operator=(BoundingBoxManager const& other) { return *this; }
 BoundingBoxManager::~BoundingBoxManager(){Release();};
+
 //Accessors
 int BoundingBoxManager::GetNumberOfBoxes(void){ return m_nBoxes; }
-//--- Non Standard Singleton Methods
+
 void BoundingBoxManager::SetVisible(bool a_bVisible, String a_sInstance)
 {
 	if(a_sInstance == "ALL")
@@ -58,21 +64,27 @@ void BoundingBoxManager::SetVisible(bool a_bVisible, String a_sInstance)
 		}
 	}
 }
-void BoundingBoxManager::SetColor(vector3 a_v3Color, String a_sInstance)
+void BoundingBoxManager::SetColor(vector3 colorAABB, String a_sInstance)
 {
 	if(a_sInstance == "ALL")
 	{
 		int nBoxes = GetNumberOfBoxes();
+
 		for(int nBox = 0; nBox < nBoxes; nBox++)
 		{
-			m_vBoundingBox[nBox]->SetColor(a_v3Color);
+			m_vBoundingBox[nBox]->SetColorAABB(colorAABB);
+			m_vBoundingBox[nBox]->SetColorOBB(colorAABB);
 		}
 	}
 	else
 	{
 		int nBox = m_pModelMngr->IdentifyInstance(a_sInstance);
+
 		if(nBox < 0 || nBox < m_nBoxes)
-			m_vBoundingBox[nBox]->SetColor(a_v3Color);
+		{
+			m_vBoundingBox[nBox]->SetColorAABB(colorAABB);
+			m_vBoundingBox[nBox]->SetColorOBB(colorAABB);
+		}
 	}
 }
 void BoundingBoxManager::SetModelMatrix(matrix4 a_mModelMatrix, String a_sInstance)
@@ -80,6 +92,7 @@ void BoundingBoxManager::SetModelMatrix(matrix4 a_mModelMatrix, String a_sInstan
 	if(a_sInstance == "ALL")
 	{
 		int nBoxes = GetNumberOfBoxes();
+
 		for(int nBox = 0; nBox < nBoxes; nBox++)
 		{
 			m_vBoundingBox[nBox]->SetModelMatrix(a_mModelMatrix);
@@ -88,6 +101,7 @@ void BoundingBoxManager::SetModelMatrix(matrix4 a_mModelMatrix, String a_sInstan
 	else
 	{
 		int nBox = m_pModelMngr->IdentifyInstance(a_sInstance);
+
 		if(nBox < 0 || nBox < m_nBoxes)
 		{
 			m_vBoundingBox[nBox]->SetModelMatrix(a_mModelMatrix);
@@ -100,6 +114,7 @@ void BoundingBoxManager::Render(String a_sInstance)
 	if(a_sInstance == "ALL")
 	{
 		int nBoxes = GetNumberOfBoxes();
+
 		for(int nBox = 0; nBox < nBoxes; nBox++)
 		{
 			m_vBoundingBox[nBox]->Render(MEDEFAULT);
@@ -108,8 +123,11 @@ void BoundingBoxManager::Render(String a_sInstance)
 	else
 	{
 		int nBox = m_pModelMngr->IdentifyInstance(a_sInstance);
+
 		if(nBox < 0 || nBox < m_nBoxes)
+		{
 			m_vBoundingBox[nBox]->Render(MEDEFAULT);
+		}
 	}
 }
 void BoundingBoxManager::AddBox(String a_sInstanceName)
@@ -154,55 +172,40 @@ void BoundingBoxManager::RemoveBox(String a_sInstanceName)
 }
 void BoundingBoxManager::Update(void)
 {
-	m_vCollidingNames.clear();
+	m_vCollidingNamesOBB.clear();
+	m_vCollidingNamesAABB.clear();
+
 	for(int nBox = 0; nBox < m_nBoxes; nBox++)
 	{
-		m_vBoundingBox[nBox]->SetColor(MEGREEN);
+		m_vBoundingBox[nBox]->SetColorOBB(MEWHITE);
+		m_vBoundingBox[nBox]->SetColorAABB(MEWHITE);
 	}
-	//CollisionCheck();
-	//CollisionResponse();
+	
+	CollisionCheck();
+	CollisionResponse();
 }
 void BoundingBoxManager::CollisionCheck(void) //Needs working
 {
-	for(int nBox2 = 0; nBox2 < m_nBoxes; nBox2++)
-	{
-		for(int nBox1 = 0; nBox1 < m_nBoxes; nBox1++)
-		{
-			if(nBox1 != nBox2)
-			{
-				//Get Radius of box1
-				float fRadius1 = m_vBoundingBox[nBox1]->GetRadius();
-				
-				//Get Radius of box2
-				float fRadius2 = m_vBoundingBox[nBox2]->GetRadius();
-				
-				//Get origin of box1
-				matrix4 mMatrix1 = m_vBoundingBox[nBox1]->GetModelMatrix();
-				vector3 vCentroid1 = m_vBoundingBox[nBox1]->GetCentroid();
-				vector3 fOrigin1 = static_cast<vector3>(glm::translate(mMatrix1, vCentroid1) * vector4(0.0f, 0.0f, 0.0f, 1.0f));
-				
-				//Get origin of box2m
-				matrix4 mMatrix2 = m_vBoundingBox[nBox2]->GetModelMatrix();
-				vector3 vCentroid2 = m_vBoundingBox[nBox2]->GetCentroid();
-				vector3 fOrigin2 = static_cast<vector3>(glm::translate(mMatrix2, vCentroid2) * vector4(0.0f, 0.0f, 0.0f, 1.0f));
-				
-				float fDistance = glm::distance(fOrigin1,fOrigin2);
-				float fRadiusSum = fRadius1 + fRadius2;
-				if(fDistance < fRadiusSum)
-				{
-					m_vCollidingNames.push_back(m_vBoundingBox[nBox1]->GetInstanceName());
-					m_vCollidingNames.push_back(m_vBoundingBox[nBox2]->GetInstanceName());
-				}
-			}
-		}
-	}
+	
 }
-bool BoundingBoxManager::CheckForNameInList(String a_sName)
+bool BoundingBoxManager::CheckForNameInListOBB(String a_sName)
 {
-	int nNames = static_cast<int>(m_vCollidingNames.size());
+	int nNames = static_cast<int>(m_vCollidingNamesOBB.size());
+
 	for(int nName = 0; nName < nNames; nName++)
 	{
-		if(m_vCollidingNames[nName] == a_sName)
+		if(m_vCollidingNamesOBB[nName] == a_sName)
+			return true;
+	}
+	return false;
+}
+bool BoundingBoxManager::CheckForNameInListAABB(String a_sName)
+{
+	int nNames = static_cast<int>(m_vCollidingNamesAABB.size());
+
+	for(int nName = 0; nName < nNames; nName++)
+	{
+		if(m_vCollidingNamesAABB[nName] == a_sName)
 			return true;
 	}
 	return false;
@@ -211,7 +214,10 @@ void BoundingBoxManager::CollisionResponse(void)
 {
 	for(int nBox = 0; nBox < m_nBoxes; nBox++)
 	{
-		if(CheckForNameInList(m_vBoundingBox[nBox]->GetInstanceName()))
-			m_vBoundingBox[nBox]->SetColor(MERED);
+		if(CheckForNameInListOBB(m_vBoundingBox[nBox]->GetInstanceName()))
+			m_vBoundingBox[nBox]->SetColorOBB(MERED);
+
+		if(CheckForNameInListOBB(m_vBoundingBox[nBox]->GetInstanceName()))
+			m_vBoundingBox[nBox]->SetColorAABB(MEBLUE);
 	}
 }

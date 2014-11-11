@@ -159,7 +159,7 @@ void ApplicationClass::ProcessKeyboard(void)
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::F7))
 	{
 		m_pBSMngr->RemoveSphere("ALL");
-		//m_pBBMngr->RemoveBox("ALL");
+		m_pBBMngr->RemoveBox("ALL");
 	}
 
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::F8))
