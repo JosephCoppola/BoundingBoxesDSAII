@@ -1,4 +1,0 @@
-BoundingBoxesDSAII
-==================
-
-Bounding Boxes Homework

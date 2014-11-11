@@ -104,8 +104,7 @@ private:
 	
 	void Release(void);
 	
-	void CalculateAABB(String a_sInstance);
-	void CalculateOBB(String a_sInstance);
+	void CalculateBoundingBox(String a_sInstance);
 };
 
 

@@ -34,7 +34,7 @@ void BoundingBoxManager::Release(void)
 	return;
 }
 
-//The big 3
+//The big 3 + destructor
 BoundingBoxManager::BoundingBoxManager(){Init();}
 BoundingBoxManager::BoundingBoxManager(BoundingBoxManager const& other){ }
 BoundingBoxManager& BoundingBoxManager::operator=(BoundingBoxManager const& other) { return *this; }
@@ -184,9 +184,52 @@ void BoundingBoxManager::Update(void)
 	CollisionCheck();
 	CollisionResponse();
 }
-void BoundingBoxManager::CollisionCheck(void) //Needs working
+void BoundingBoxManager::CollisionCheck(void)
 {
-	
+	for(int i = 0; i < m_nBoxes; i++)
+	{
+		for(int j = 0; j < m_nBoxes; j++)
+		{
+			if(i != j)
+			{
+
+				bool collision = false;
+
+				//Get the mins and max
+				vector3 min1 = m_vBoundingBox[i]->GetMinAABB();
+				vector3 max1 = m_vBoundingBox[i]->GetMaxAABB();
+				vector3 min2 = m_vBoundingBox[j]->GetMinAABB();
+				vector3 max2 = m_vBoundingBox[j]->GetMaxAABB();
+
+				//Translate the first centroid to global 
+				matrix4 mat1 = m_vBoundingBox[i]->GetModelMatrix();
+				vector3 centroid1 = m_vBoundingBox[i]->GetCentroidAABB();
+				min1 = static_cast<vector3>(glm::translate(centroid1) * vector4(min1.x, min1.y, min1.z, 1.0f));
+				max1 = static_cast<vector3>(glm::translate(centroid1) * vector4(max1.x, max1.y, max1.z, 1.0f));
+				
+				
+				//Translate the second centroid to global
+				matrix4 mat2 = m_vBoundingBox[j]->GetModelMatrix();
+				vector3 centroid2 = m_vBoundingBox[j]->GetCentroidAABB();
+				min2 = static_cast<vector3>(glm::translate(centroid1) * vector4(min2.x, min2.y, min2.z, 1.0f));
+				max2 = static_cast<vector3>(glm::translate(centroid1) * vector4(max2.x, max2.y, max2.z, 1.0f));
+
+				//Check all instances to see if a collision has occurred
+				if(max1.x > min2.x && min1.x < max2.x &&
+					max1.y > min2.y && min1.y < max2.y && 
+					max1.z > min2.z && min1.z < max2.z) 
+				{
+					collision = true;
+				}
+
+				if(collision == true)
+				{
+					m_vCollidingNamesAABB.push_back(m_vBoundingBox[i]->GetInstanceName());
+					m_vCollidingNamesAABB.push_back(m_vBoundingBox[j]->GetInstanceName());
+				}
+			}
+		}
+	}
 }
 bool BoundingBoxManager::CheckForNameInListOBB(String a_sName)
 {
@@ -217,7 +260,7 @@ void BoundingBoxManager::CollisionResponse(void)
 		if(CheckForNameInListOBB(m_vBoundingBox[nBox]->GetInstanceName()))
 			m_vBoundingBox[nBox]->SetColorOBB(MERED);
 
-		if(CheckForNameInListOBB(m_vBoundingBox[nBox]->GetInstanceName()))
+		if(CheckForNameInListAABB(m_vBoundingBox[nBox]->GetInstanceName()))
 			m_vBoundingBox[nBox]->SetColorAABB(MEBLUE);
 	}
 }

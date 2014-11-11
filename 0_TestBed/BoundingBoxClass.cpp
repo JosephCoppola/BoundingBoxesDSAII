@@ -30,8 +30,7 @@ BoundingBoxClass::BoundingBoxClass(String a_sInstanceName)
 		return;
 
 	//Calculate the intial OBB and AABB
-	CalculateOBB(m_sInstance);
-	CalculateAABB(m_sInstance);
+	CalculateBoundingBox(m_sInstance);
 
 	//Get the Model to World matrix associated with the Instance
 	m_mModelToWorld = m_pModelMngr->GetModelMatrix(m_sInstance);
@@ -67,8 +66,7 @@ BoundingBoxClass::BoundingBoxClass(BoundingBoxClass const& other)
 	maxAABB = other.maxAABB;
 
 	//Calculate the new OBB and AABB
-	CalculateOBB(m_sInstance);
-	CalculateAABB(m_sInstance);
+	CalculateBoundingBox(m_sInstance);
 
 	// CREATES OBB
 	m_pMeshOBB = new PrimitiveWireClass();
@@ -185,7 +183,7 @@ void BoundingBoxClass::SetModelMatrix(matrix4 a_mModelMatrix) //Check here later
 
 	m_pMeshOBB->SetModelMatrix(a_mModelMatrix);
 
-	CalculateAABB(m_sInstance);
+	CalculateBoundingBox(m_sInstance);
 
 	matrix4 scaleMatOBB = glm::scale(matrix4(1.0f),scaleOBB);
 	matrix4 translationMatOBB = glm::translate(m_mModelToWorld,OBBCentroid);
@@ -197,7 +195,7 @@ void BoundingBoxClass::SetModelMatrix(matrix4 a_mModelMatrix) //Check here later
 }
 
 //Methods
-void BoundingBoxClass::CalculateOBB(String a_sInstance)
+void BoundingBoxClass::CalculateBoundingBox(String a_sInstance)
 {
 	//Get the vertices List to calculate the maximum and minimum
 	std::vector<vector3> vVertices = m_pModelMngr->GetVertices(a_sInstance);
@@ -209,63 +207,57 @@ void BoundingBoxClass::CalculateOBB(String a_sInstance)
 		return;
 
 	//Go one by one on each component and realize which one is the smallest one
-	vector3 v3Minimum;
 	if(nVertices > 0)
 	{
 		//We assume the first vertex is the smallest one
-		v3Minimum = vVertices[0];
+		minOBB = vVertices[0];
 		//And iterate one by one
 		for(int nVertex = 1; nVertex < nVertices; nVertex++)
 		{
-			if(vVertices[nVertex].x < v3Minimum.x)
-				v3Minimum.x = vVertices[nVertex].x;
+			if(vVertices[nVertex].x < minOBB.x)
+				minOBB.x = vVertices[nVertex].x;
 
-			if(vVertices[nVertex].y < v3Minimum.y)
-				v3Minimum.y = vVertices[nVertex].y;
+			if(vVertices[nVertex].y < minOBB.y)
+				minOBB.y = vVertices[nVertex].y;
 
-			if(vVertices[nVertex].z < v3Minimum.z)
-				v3Minimum.z = vVertices[nVertex].z;
+			if(vVertices[nVertex].z < minOBB.z)
+				minOBB.z = vVertices[nVertex].z;
 		}
-		minOBB = v3Minimum;
 	}
 	
 	//Go one by one on each component and realize which one is the largest one
-	vector3 v3Maximum;
 	if(nVertices > 0)
 	{
 		//We assume the first vertex is the largest one
-		v3Maximum = vVertices[0];
+		maxOBB = vVertices[0];
 		//And iterate one by one
 		for(int nVertex = 1; nVertex < nVertices; nVertex++)
 		{
-			if(vVertices[nVertex].x > v3Maximum.x)
-				v3Maximum.x = vVertices[nVertex].x;
+			if(vVertices[nVertex].x > maxOBB.x)
+				maxOBB.x = vVertices[nVertex].x;
 
-			if(vVertices[nVertex].y > v3Maximum.y)
-				v3Maximum.y = vVertices[nVertex].y;
+			if(vVertices[nVertex].y > maxOBB.y)
+				maxOBB.y = vVertices[nVertex].y;
 
-			if(vVertices[nVertex].z > v3Maximum.z)
-				v3Maximum.z = vVertices[nVertex].z;
+			if(vVertices[nVertex].z > maxOBB.z)
+				maxOBB.z = vVertices[nVertex].z;
 		}
-		maxOBB = v3Maximum;
 	}
 
 	//The centroid is going to be the point that is halfway of the min to the max
 	OBBCentroid = minOBB + maxOBB;
 	OBBCentroid /= 2.0f;
 
-	vector3 scaleVector;
+	vector3 scaleVectorOBB;
 
-	scaleVector.x = glm::distance(v3Minimum.x,v3Maximum.x);
-	scaleVector.y = glm::distance(v3Minimum.y,v3Maximum.y);
-	scaleVector.z = glm::distance(v3Minimum.z,v3Maximum.z);
+	scaleVectorOBB.x = glm::distance(minOBB.x,maxOBB.x);
+	scaleVectorOBB.y = glm::distance(minOBB.y,maxOBB.y);
+	scaleVectorOBB.z = glm::distance(minOBB.z,maxOBB.z);
 
-	scaleOBB = scaleVector;
-}
-void BoundingBoxClass::CalculateAABB(String a_sInstance)
-{
-	std::vector<vector3> newVertices = m_pModelMngr->GetVertices(a_sInstance);
-	int nVertices = static_cast<int>(newVertices.size());
+	scaleOBB = scaleVectorOBB;
+
+
+	//Now calculate AABB
 
 	if(nVertices == 0)
 		return;
@@ -274,7 +266,7 @@ void BoundingBoxClass::CalculateAABB(String a_sInstance)
 
 	for(int i = 0; i < nVertices; i++)
 	{
-		globalVerts[i] = vector4(newVertices[i].x, newVertices[i].y, newVertices[i].z, 1.0f);
+		globalVerts[i] = vector4(vVertices[i].x, vVertices[i].y, vVertices[i].z, 1.0f);
 		globalVerts[i] = m_mModelToWorld * globalVerts[i];
 	}
 
