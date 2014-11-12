@@ -135,6 +135,8 @@ void BoundingBoxManager::AddBox(String a_sInstanceName)
 	BoundingBoxClass* oBox = new BoundingBoxClass(a_sInstanceName);
 	m_vBoundingBox.push_back(oBox);
 	m_nBoxes++;
+
+	oBox->SetModelMatrix(m_pModelMngr->GetModelMatrix(a_sInstanceName));
 }
 void BoundingBoxManager::RemoveBox(String a_sInstanceName)
 {
